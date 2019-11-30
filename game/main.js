@@ -1,5 +1,4 @@
-let rows = []
-let fruit = []
+
 function createCells (gridSize) {
     for (let i = 0; i < gridSize; i++) {
         let rowObj = {
@@ -17,8 +16,8 @@ function createFruit() {
     fruit[0] = Math.floor(Math.random() * 1000) % gridSize
     fruit[1] = Math.floor(Math.random() * 1000) % gridSize
 }
-function removeFruit() {
-    fruit = []
+function removeFruit(game) {
+    game.fruit = []
 }
 
 function moveSnake (snake) {
@@ -114,7 +113,9 @@ module.exports = {
         createCells(gridSize)
         createFruit()
     },
-    snakeCycle: (snake) => {
-        moveSnake(snake)
+    gameCycle: (game) => {
+        game.players.forEach(player => {
+            moveSnake(player.snake)
+        })
     }
 }

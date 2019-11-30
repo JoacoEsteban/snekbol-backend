@@ -41,6 +41,7 @@ app.post('/login', (req, res) => {
       id,
       started: false,
       players: [],
+      fruit: [],
       gameInterval: null
     }
     games.push(game)

@@ -7,14 +7,11 @@ let gridSize = 25
 
 module.exports = {
         startGame: (game) => {
-        game.gameInterval = setInterval(() => handleEventInterval(game.players), moveTime)
+        game.gameInterval = setInterval(() => handleEventInterval(game), moveTime)
     }
 }
 
-function handleEventInterval (players) {
-    players.forEach(player => {
-        let {snake} = player
-        let newSnake = gameFunctions.snakeCycle(snake)
-        console.log('cycle', snake)
-    })
+function handleEventInterval (game) {
+    let newSnake = gameFunctions.gameCycle(game)
+    console.log('cycle')
 }
