@@ -4,6 +4,11 @@ module.exports = {
   game: function (instance) {
     this.game = instance
     instance.process = this
+
+    this.game.players.forEach(({ snake }, index) => {
+      // TODO position snakes
+    })
+
     this.createFruit = () => {
       this.game.fruit[0] = Math.floor(Math.random() * 1000) % this.game.gridSize
       this.game.fruit[1] = Math.floor(Math.random() * 1000) % this.game.gridSize

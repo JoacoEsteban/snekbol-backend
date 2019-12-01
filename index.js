@@ -79,10 +79,11 @@ app.post('/login', (req, res) => {
     name: req.body.name,
     prepared: false,
     snake: {
-      head: [0, 0],
+      head: [null, null],
+      id: game.players.length + 1,
       body: [],
       nextDirection: null,
-      prevDirection: 1,
+      prevDirection: null,
       counter: 0
     }
   }
