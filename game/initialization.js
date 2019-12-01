@@ -2,7 +2,7 @@ const gameFunctions = require('./main.js')
 
 let rows = []
 let fruit = []
-let moveTime = 100
+let moveTime = 500
 let gridSize = 25
 
 module.exports = {

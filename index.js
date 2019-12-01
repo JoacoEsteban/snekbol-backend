@@ -76,6 +76,7 @@ app.post('/login', (req, res) => {
       body: [],
       nextDirection: null,
       prevDirection: 1,
+      counter: 0
     }
   }
   console.log('new player', id)
@@ -86,12 +87,3 @@ app.post('/login', (req, res) => {
   game.players.push(newPlayer)
   res.json(newPlayer)
 })
-
-// TODO change this into ws
-// app.ws('/im-ready', (req, res) => {
-//   let game = games.find(game => game.id === req.body.game_id)
-//   game.players.find(player => player.id === req.body.player_id).prepared = true
-
-//   if (game.players.some(player => player.prepared === false)) return res.send('not all ready')
-//   startGame(game)
-// })
