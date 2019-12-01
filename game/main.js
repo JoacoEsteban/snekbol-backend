@@ -3,6 +3,7 @@ const _ = require('lodash')
 module.exports = {
   game: function (instance) {
     this.game = instance
+    instance.process = this
     this.createFruit = () => {
       this.game.fruit[0] = Math.floor(Math.random() * 1000) % this.game.gridSize
       this.game.fruit[1] = Math.floor(Math.random() * 1000) % this.game.gridSize
@@ -96,11 +97,32 @@ module.exports = {
         this.removeFruit()
         this.createFruit()
       },
+      this.areAllPlayersGone = () => {
+        if (this.game.players.some(player => player.isConnected)) return
+        console.log('All players disconnected')
+        this.closeGame()
+      },
+      this.closeGame = async () => {
+        clearInterval(this.game.gameInterval)
+        try {
+
+          await this.sendToAllPlayers({
+            event: 'game-over',
+            players: this.game.players.map(p => {
+              return {
+                ...p,
+                ws: undefined
+              }
+            })
+          })
+          console.log('Game Closed')
+        } catch (error) {
+          console.error('ERROR WHEN CLOSING GAME WITH ID ', this.game.id, error)
+        }
+      },
       this.gameCycle = () => {
-        console.log('cycle')
         this.game.players.forEach(player => {
           this.moveSnake(player.snake)
-          console.log(player.snake)
         })
         let toSend = {
           ...this.game,
@@ -110,12 +132,17 @@ module.exports = {
               ws: undefined
             }
           }),
+          process: undefined,
           gameInterval: undefined
         }
-        this.game.players.forEach(player => {
-          player.ws.send(JSON.stringify(toSend))
-        })
+        this.sendToAllPlayers(toSend)
       }
+    this.sendToAllPlayers = (data) => {
+      this.game.players.forEach(player => {
+        if (!player.isConnected) return
+        player.ws.send(JSON.stringify(data))
+      })
+    }
     this.createFruit()
     return this
   }

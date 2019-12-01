@@ -28,10 +28,17 @@ app.ws('/', function (ws, req) {
     switch (directive) {
       case 'im-ready':
         let { game_id } = msg
+        console.log('GAME', game_id)
         let currentGame = games.find(game => game.id === game_id)
         let playerReady = currentGame.players.find(player => player.id === player_id)
         playerReady.prepared = true
+        playerReady.isConnected = true
         playerReady.ws = ws
+        ws.on('close', () => {
+          console.log(`Player ${playerReady.name} disconnected`)
+          playerReady.isConnected = false
+          currentGame.process.areAllPlayersGone()
+        })
 
         if (currentGame.players.some(player => player.prepared === false)) return ws.send('not all ready')
         startGame(currentGame)
