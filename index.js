@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const uuid = require('uuid/v4');
 const app = require('express')()
-const {startGame} = require('./game/initialization')
+const { startGame } = require('./game/initialization')
 let expressWs = require('express-ws')(app)
 let bodyParser = require('body-parser')
 app.use(bodyParser.json()) // support json encoded bodies
@@ -11,22 +11,38 @@ let players = []
 let games = []
 
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-    res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
-	next()
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+  res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
+  next()
 })
 
 app.listen(5000, () => {
   console.log('App listening on port 5000')
 })
 
-app.ws('/', function(ws, req) {
-  ws.on('message', function(msg) {
-    let { player_id, direction } = JSON.parse(msg)
-    let game = players.find(player => player.id === player_id).game
-    let player = game.players.find(player => player.id === player_id)
-    player.snake.nextDirection = direction
+app.ws('/', function (ws, req) {
+  ws.on('message', function (msg) {
+    msg = JSON.parse(msg)
+    let { player_id, directive } = msg
+    switch (directive) {
+      case 'im-ready':
+        let { game_id } = msg
+        let currentGame = games.find(game => game.id === game_id)
+        let playerReady = currentGame.players.find(player => player.id === player_id)
+        playerReady.prepared = true
+        playerReady.ws = ws
+
+        if (currentGame.players.some(player => player.prepared === false)) return ws.send('not all ready')
+        startGame(currentGame)
+        break
+      case 'direction':
+        let { direction } = msg
+        let game = players.find(player => player.id === player_id).game
+        let player = game.players.find(player => player.id === player_id)
+        player.snake.nextDirection = direction
+        break
+    }
   })
 })
 
@@ -42,6 +58,7 @@ app.post('/login', (req, res) => {
       started: false,
       players: [],
       fruit: [],
+      gridSize: 25,
       gameInterval: null
     }
     games.push(game)
@@ -71,10 +88,10 @@ app.post('/login', (req, res) => {
 })
 
 // TODO change this into ws
-app.post('/im-ready', (req, res) => {
-  let game = games.find(game => game.id === req.body.game_id)
-  game.players.find(player => player.id === req.body.player_id).prepared = true
+// app.ws('/im-ready', (req, res) => {
+//   let game = games.find(game => game.id === req.body.game_id)
+//   game.players.find(player => player.id === req.body.player_id).prepared = true
 
-  if (game.players.some(player => player.prepared === false)) return res.send('not all ready')
-  startGame(game)
-})
+//   if (game.players.some(player => player.prepared === false)) return res.send('not all ready')
+//   startGame(game)
+// })
