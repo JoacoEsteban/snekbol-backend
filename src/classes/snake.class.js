@@ -4,7 +4,7 @@ module.exports = class Snake {
     this.id = id
     this.body = []
     this.nextDirection = null
-    this.prevDirection = 0
+    this.prevDirection = 1
     this.counter = 0
   }
 

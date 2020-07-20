@@ -1,8 +1,9 @@
 const Snake = require('./snake.class')
 
 module.exports = class Player {
-  constructor(id, name, game, connected, prepared) {
-    this.id = id
+  constructor(name, game, connected, prepared) {
+    this.id = global.uuid()
+    this.secret = global.uuid()
     this.name = name
     this.game = game
     this.ws = null
@@ -12,7 +13,7 @@ module.exports = class Player {
     }
     this.snake = new Snake()
   }
-  
+
   get sendableInfo () {
     return {
       id: this.id,
@@ -23,11 +24,15 @@ module.exports = class Player {
     }
   }
 
-  imReady (ws) {
-    this.flags.prepared = true
+  setWs (ws) {
     this.flags.connected = true
     this.ws = ws
     ws.on('close', () => this.onDisconnect())
+  }
+
+  imReady () {
+    this.flags.prepared = true
+    this.flags.connected = true
 
     this.game.onPlayerReady()
     //  return ws.send('not all ready')

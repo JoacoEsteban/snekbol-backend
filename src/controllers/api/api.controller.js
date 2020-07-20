@@ -5,6 +5,9 @@ module.exports = {
   handleLogin (req, res) {
     const player = store.CONTROLLER.newPlayer(req.body.name)
     lobbyController.allocatePlayerInGame(player)
-    res.json(player.sendableInfo)
+    const playerInfo = player.sendableInfo
+    playerInfo.secret = player.secret
+    res.json({ player: playerInfo })
+    player.game.onPlayerConnected()
   }
 }

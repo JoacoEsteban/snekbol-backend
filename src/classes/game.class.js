@@ -36,15 +36,21 @@ module.exports = class Game {
     this.flags.started = true
     this.gameInstance.startGame()
   }
-  sendToAllPlayers (data) {
+  sendToAllPlayers (data = {}) {
     data = JSON.stringify(global._.merge({ game: this.sendableInfo }, data))
-    this.players.forEach(player => player.flags.connected && player.ws.send(data))
+    this.players.forEach(player => this.sendToPlayer(player, data))
+  }
+  sendToPlayer (player, data = JSON.stringify({ game: this.sendableInfo })) {
+    player.flags.connected && player.ws.send(data)
   }
   // ---------------------EVENTS---------------------
   onPlayerReady () {
     const allReady = this.players.every(player => player.flags.prepared)
     allReady && this.startGame()
     return allReady
+  }
+  onPlayerConnected () {
+    this.sendToAllPlayers()
   }
   onPlayerDisconnected () {
     this.gameInstance && this.gameInstance.areAllPlayersGone()
@@ -128,6 +134,7 @@ class GameInstance {
 
   startGame () {
     this.positionSnakes()
+    this.createFruit()
     this.game.gameInterval = setInterval(() => this.gameCycle(), this.game.cycleTime)
   }
 }

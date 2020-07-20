@@ -1,10 +1,20 @@
 const store = require("../../store")
 
+const auth = (player, msg) => {
+  const { player_secret } = msg
+  return (player && player.secret) === player_secret
+}
+
 module.exports = {
   handleMessage(ws, msg) {
-    let { player_id, directive } = msg
-    const player = store.CONTROLLER.getPlayerById(player_id)
-    switch (directive) {
+    const player = store.CONTROLLER.getPlayerById(msg.player_id)
+
+    if (!auth(player, msg)) return
+    switch (msg.directive) {
+      case 'connect':
+        player.setWs(ws)
+        player.game.sendToPlayer(player)
+        break
       case 'im-ready':
         player.imReady(ws)
         break

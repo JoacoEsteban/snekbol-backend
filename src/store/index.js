@@ -4,7 +4,7 @@ const Game = require('../classes/game.class')
 const CONTROLLER = {
   // ---------------------SETTERS---------------------
   newPlayer (name) {
-    const player = new Player(global.uuid(), name, null, false)
+    const player = new Player(name, null, false)
     store.PLAYERS.push(player)
     return player
   },
