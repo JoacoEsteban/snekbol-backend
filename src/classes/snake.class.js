@@ -1,12 +1,18 @@
 module.exports = class Snake {
-  constructor(id) {
+  constructor(parent, id = global.uuid(),) {
+    this.#PARENT = parent
     this.head = [null, null]
     this.id = id
     this.body = []
     this.nextDirection = null
     this.prevDirection = 1
     this.counter = 0
+    this.flags = {
+      dead: false
+    }
   }
+
+  #PARENT = null
 
   move () {
     let goTo = this.nextDirection
@@ -45,13 +51,29 @@ module.exports = class Snake {
         break
     }
 
-    // if (this.isColliding()) return this.gameOver(this) TODO
+    if (this.isColliding(newPos)) return this.die()
 
     this.body = [this.head, ...this.body]
     this.body.pop()
     this.head = newPos
     this.nextDirection = null
     this.prevDirection = goTo
+
+  }
+
+  isColliding (pos = this.head) {
+    return this.OOB(pos) || this.collidingWithSnakes()
+  }
+
+  OOB (pos = this.head) {
+    const max = this.#PARENT.game.gridSize
+    const Y = pos[0]
+    const X = pos[1]
+    return (Y < 0 || Y >= max) || (X < 0 || X >= max)
+  }
+
+  collidingWithSnakes () {
+    return false
   }
 
   grow () {
@@ -71,5 +93,10 @@ module.exports = class Snake {
         break
     }
     this.body.push(newCell)
+  }
+
+  die () {
+    this.flags.dead = true
+    this.#PARENT.game.onSnakeDead(this.#PARENT)
   }
 }

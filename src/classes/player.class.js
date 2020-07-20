@@ -11,7 +11,7 @@ module.exports = class Player {
       connected: connected || false,
       prepared: prepared || false,
     }
-    this.snake = new Snake()
+    this.snake = new Snake(this)
   }
 
   get sendableInfo () {

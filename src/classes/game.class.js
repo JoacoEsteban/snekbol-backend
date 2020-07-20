@@ -2,7 +2,8 @@ module.exports = class Game {
   constructor(id = global.uuid(), players, fruit, gridSize, cycleTime = 250) {
     this.id = id
     this.flags = {
-      started: false
+      started: false,
+      ended: false,
     }
     this.players = players || []
     this.fruit = fruit || []
@@ -22,10 +23,15 @@ module.exports = class Game {
     }
   }
 
+  get isAvailableToJoin () {
+    return !this.flags.started && !this.flags.ended
+  }
+
   // ---------------------METHODS---------------------
 
   addPlayer(player) {
     this.players.push(player)
+    console.log('Player', player.name, 'connected to game', this.id)
   }
   removePlayer(player) {
     this.players = this.players.filter(p => p !== player)
@@ -54,6 +60,12 @@ module.exports = class Game {
   }
   onPlayerDisconnected () {
     this.gameInstance && this.gameInstance.areAllPlayersGone()
+  }
+  onSnakeDead (player) {
+    this.players = this.players.sort((a, b) => {
+      if (a === player) return 1
+      if (b === player) return -1
+    })
   }
 }
 
@@ -92,9 +104,6 @@ class GameInstance {
     // }
     return false
   }
-  gameOver () {
-    console.log('gameover')
-  }
   checkFruit (snake) {
     if (!(snake.head[0] === this.game.fruit[0] && snake.head[1] === this.game.fruit[1])) return
     this.eatFruit(snake)
@@ -114,8 +123,9 @@ class GameInstance {
   }
 
   async closeGame () {
-    clearInterval(this.game.gameInterval)
     try {
+      clearInterval(this.game.gameInterval)
+      this.game.flags.ended = true
       await this.game.sendToAllPlayers({event: 'game-over'})
       console.log('Game Closed')
     } catch (error) {
@@ -124,10 +134,15 @@ class GameInstance {
   }
 
   gameCycle () {
+    let alive = 0
     this.game.players.forEach(({snake}) => {
+      if (snake.flags.dead) return
       snake.move()
+      if (snake.flags.dead) return
       this.checkFruit(snake)
+      alive++
     })
+    if (!alive) return this.closeGame()
     this.game.sendToAllPlayers()
   }
 
