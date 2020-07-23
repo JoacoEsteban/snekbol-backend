@@ -1,6 +1,6 @@
 module.exports = class Game {
-  constructor(id = global.uuid(), players, fruit, gridSize, cycleTime = 250) {
-    this.id = id
+  constructor(cycleTime = 250, players, fruit, gridSize) {
+    this.id = global.uuid()
     this.flags = {
       started: false,
       ended: false,

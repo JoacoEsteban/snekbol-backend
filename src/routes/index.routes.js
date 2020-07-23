@@ -7,4 +7,5 @@ module.exports = app => {
   })
 
   app.post('/login', apiController.handleLogin)
+  app.get('/ping', (req, res) => res.status(200).send())
 }

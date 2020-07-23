@@ -8,9 +8,13 @@ const CONTROLLER = {
     store.PLAYERS.push(player)
     return player
   },
+  // ---------------------CONTRUCTORS---------------------
+  createGame () {
+    return store.GAMES.push(new Game()) && global._.last(store.GAMES)
+  },
   // ---------------------GETTERS---------------------
   getNextGame () {
-    return store.GAMES.find(game => game.isAvailableToJoin) || (store.GAMES.push(new Game()) && global._.last(store.GAMES))
+    return store.GAMES.find(game => game.isAvailableToJoin) || this.createGame()
   },
   getPlayerById (id) {
     return store.PLAYERS.find(player => player.id === id) || null
