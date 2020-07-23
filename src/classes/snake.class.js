@@ -4,7 +4,7 @@ module.exports = class Snake {
     this.head = [null, null]
     this.id = id
     this.body = []
-    this.nextDirection = null
+    this.nextDirection = 1
     this.prevDirection = 1
     this.counter = 0
     this.flags = {
@@ -17,46 +17,32 @@ module.exports = class Snake {
   move () {
     let goTo = this.nextDirection
 
-    switch (goTo) {
-      case 0:
-        if (this.prevDirection === 2) goTo = this.prevDirection
-        break
-      case 1:
-        if (this.prevDirection === 3) goTo = this.prevDirection
-        break
-      case 2:
-        if (this.prevDirection === 0) goTo = this.prevDirection
-        break
-      case 3:
-        if (this.prevDirection === 1) goTo = this.prevDirection
-        break
-      default:
-        goTo = this.prevDirection
-        break
-    }
+    if (Math.abs(goTo - this.prevDirection) === 2) goTo = this.prevDirection
 
     const newPos = [...this.head]
+
+    let index = 0
+    let op = -1
     switch (goTo) {
-      case 0:
-        newPos[0]--
-        break
       case 1:
-        newPos[1]++
-        break
-      case 2:
-        newPos[0]++
+        index = 1
+        op = 1
         break
       case 3:
-        newPos[1]--
+        index = 1
         break
+      case 2:
+        op = 1
     }
+    goTo === 3 && console.log(index, op, goTo)
+    newPos[index] += op
 
     if (this.isColliding(newPos)) return this.die()
 
     this.body = [this.head, ...this.body]
     this.body.pop()
     this.head = newPos
-    this.nextDirection = null
+    // this.nextDirection = null
     this.prevDirection = goTo
 
   }
@@ -78,20 +64,17 @@ module.exports = class Snake {
 
   grow () {
     const newCell = this.body.length > 0 ? [...(_.last(this.body))] : this.head
+    let index = 0
+    let op = -1
     switch (this.prevDirection) {
-      case 0:
-        newCell[0]--
-        break
       case 1:
-        newCell[1]--
-        break
-      case 2:
-        newCell[0]++
-        break
       case 3:
-        newCell[1]++
-        break
+        index = 1
+      case 2:
+      case 3:
+        op = 1
     }
+    newCell[index] += op
     this.body.push(newCell)
   }
 
@@ -100,3 +83,26 @@ module.exports = class Snake {
     this.#PARENT.game.onSnakeDead(this.#PARENT)
   }
 }
+
+/*
+NEW BODY STRUCTURE
+  Snake is now a set of arrays with a direction and length instead of just a set of points
+  only x,y is the head
+  eg: 
+                                 L-D
+----------------------- 
+--------------x....----
+--------------.--------
+--------------.--------
+--------------.--------
+-----x........x-------- HEAD 5,0 [10,1 | 4,0 | 4,1]
+
+
+
+
+
+COLLISION LOGIC
+compare snake head with other snakes vertices
+if any coordinate of the vetex matches => compare direction, if direction matches => compare length, if length >= hay colision
+
+*/
