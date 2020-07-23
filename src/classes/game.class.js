@@ -84,7 +84,7 @@ class GameInstance {
     this.game.players.forEach((player, index) => {
       // TODO position snakes
       player.snake = new Snake(player)
-      player.snake.head = [0, 0]
+      player.snake.resetPosition()
     })
   }
 

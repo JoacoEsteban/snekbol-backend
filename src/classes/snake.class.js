@@ -14,16 +14,28 @@ module.exports = class Snake {
 
   #PARENT = null
 
+  get firstSegment () {
+    return this.body[0]
+  }
+
+  get lastSegment () {
+    return this.body[this.body.length - 1]
+  }
+
+  resetPosition (x = 0, y = 0, length = 1, direction = this.prevDirection) {
+    this.head = [y, x]
+    this.body = [{
+      _length: length,
+      direction
+    }]
+  }
+
   move () {
-    let goTo = this.nextDirection
-
-    if (Math.abs(goTo - this.prevDirection) === 2) goTo = this.prevDirection
-
+    const nextDirection = (Math.abs(this.nextDirection - this.prevDirection) === 2) ? this.prevDirection : this.nextDirection
     const newPos = [...this.head]
-
     let index = 0
     let op = -1
-    switch (goTo) {
+    switch (nextDirection) {
       case 1:
         index = 1
         op = 1
@@ -34,16 +46,27 @@ module.exports = class Snake {
       case 2:
         op = 1
     }
-    goTo === 3 && console.log(index, op, goTo)
     newPos[index] += op
+
+    if (this.firstSegment) {
+      if (this.firstSegment.direction !== nextDirection) {
+        this.body = [{
+          direction: nextDirection,
+          _length: 0
+        }, ...this.body]
+      }
+    }
 
     if (this.isColliding(newPos)) return this.die()
 
-    this.body = [this.head, ...this.body]
-    this.body.pop()
+    // this.body = [this.head, ...this.body]
+    // this.body.pop()
+    this.firstSegment && this.firstSegment._length++
+    this.lastSegment && (!--this.lastSegment._length) && this.body.pop()
     this.head = newPos
+    console.log(this.body)
     // this.nextDirection = null
-    this.prevDirection = goTo
+    this.prevDirection = nextDirection
 
   }
 
@@ -63,19 +86,20 @@ module.exports = class Snake {
   }
 
   grow () {
-    const newCell = this.body.length > 0 ? [...(_.last(this.body))] : this.head
-    let index = 0
-    let op = -1
-    switch (this.prevDirection) {
-      case 1:
-      case 3:
-        index = 1
-      case 2:
-      case 3:
-        op = 1
-    }
-    newCell[index] += op
-    this.body.push(newCell)
+    this.lastSegment._length++
+    // const newCell = this.body.length > 0 ? [...(_.last(this.body))] : this.head
+    // let index = 0
+    // let op = -1
+    // switch (this.prevDirection) {
+    //   case 1:
+    //   case 3:
+    //     index = 1
+    //   case 2:
+    //   case 3:
+    //     op = 1
+    // }
+    // newCell[index] += op
+    // this.body.push(newCell)
   }
 
   die () {
