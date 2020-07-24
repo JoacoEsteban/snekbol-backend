@@ -37,7 +37,9 @@ module.exports = class Game {
   removePlayer(player) {
     this.players = this.players.filter(p => p !== player)
   }
-
+  get connectedPlayers () {
+    return this.players.filter(player => player.flags.connected)
+  }
   // ---------------------GAME---------------------
   startGame () {
     this.flags.started = true
