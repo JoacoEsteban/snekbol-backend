@@ -1,3 +1,4 @@
+const Snake = require('./snake.class')
 module.exports = class Game {
   constructor(cycleTime = 250, players, fruit, gridSize) {
     this.id = global.uuid()
@@ -36,7 +37,9 @@ module.exports = class Game {
   removePlayer(player) {
     this.players = this.players.filter(p => p !== player)
   }
-
+  get connectedPlayers () {
+    return this.players.filter(player => player.flags.connected)
+  }
   // ---------------------GAME---------------------
   startGame () {
     this.flags.started = true
@@ -80,9 +83,10 @@ class GameInstance {
   }
 
   positionSnakes () {
-    this.game.players.forEach(({ snake }, index) => {
+    this.game.players.forEach((player, index) => {
       // TODO position snakes
-      snake.head = [0, 0]
+      player.snake = new Snake(player)
+      player.snake.resetPosition()
     })
   }
 
