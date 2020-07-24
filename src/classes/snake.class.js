@@ -87,43 +87,7 @@ module.exports = class Snake {
   collidingWithSnake (snake, pos) {
     const {head, body} = snake
     const isSame = snake === this
-
-    if (!isSame && snake.head[0] === pos[0] && snake.head[1] === pos[1]) return true // colliding head
-
-    const operate = (seg, l) => {
-      switch (seg.direction) {
-        case 0:
-          start[0] -= l
-          break
-        case 1:
-          start[1] += l
-          break
-        case 2:
-          start[0] += l
-          break
-        case 3:
-          start[1] -= l
-          break
-      }
-    }
-    const start = [...head]
-    return body.some((seg, i) => {
-      // if (isSame && i === 0 && seg) operate(seg, 1)
-      if (pos[0] === start[0]) {
-        if (pos[1] === start[1]) return true
-        if (pos[1] < start[1] && seg.direction === 3 && start[1] - seg._length < pos[1]) return true
-        else if (seg.direction === 1 && start[1] + seg._length >= pos[1]) return true
-      }
-      if (pos[1] === start[1]) {
-        if (pos[0] === start[0]) return true
-        if (pos[0] < start[0] && seg.direction === 0 && start[0] - seg._length <= pos[0]) return true
-        else if (seg.direction === 2 && start[0] + seg._length >= pos[0]) return true
-      }
-
-      // operate
-      operate(seg, seg._length)
-    })
-    // return false
+    
   }
 
   grow () {
