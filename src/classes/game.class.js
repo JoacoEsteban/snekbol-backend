@@ -1,6 +1,6 @@
 const Snake = require('./snake.class')
 module.exports = class Game {
-  constructor(cycleTime = 250, players, fruit, gridSize) {
+  constructor(cycleTime = 150, players, fruit, gridSize) {
     this.id = global.uuid()
     this.flags = {
       started: false,

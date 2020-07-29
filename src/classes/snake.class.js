@@ -22,7 +22,7 @@ module.exports = class Snake {
     return this.body[this.body.length - 1]
   }
 
-  resetPosition (x = 0, y = 0, length = 1, direction = this.prevDirection) {
+  resetPosition (x = 0, y = 0, length = 10, direction = this.prevDirection) {
     this.head = [y, x]
     this.body = [{
       _length: length,
@@ -48,63 +48,81 @@ module.exports = class Snake {
     }
     newPos[index] += op
 
-    if (this.firstSegment) {
-      if (this.firstSegment.direction !== nextDirection) {
-        this.body = [{
-          direction: nextDirection,
-          _length: 0
-        }, ...this.body]
-      }
-    }
-
     if (this.isColliding(newPos)) return this.die()
 
-    // this.body = [this.head, ...this.body]
-    // this.body.pop()
-    this.firstSegment && this.firstSegment._length++
-    this.lastSegment && (!--this.lastSegment._length) && this.body.pop()
-    this.head = newPos
-    console.log(this.body)
-    // this.nextDirection = null
-    this.prevDirection = nextDirection
+    if (this.firstSegment && this.firstSegment.direction !== nextDirection) {
+      this.body = [{
+        direction: nextDirection,
+        _length: 0
+      }, ...this.body]
+    }
 
+
+    this.lastSegment && (!--this.lastSegment._length) && this.body.pop()
+    this.firstSegment && this.firstSegment._length++
+    this.head = newPos
+
+    this.prevDirection = nextDirection
   }
 
   isColliding (pos = this.head) {
-    return this.OOB(pos) || this.collidingWithSnakes(pos)
+    return this.isOOB(pos) || this.isCollidingWithSnakes(pos)
   }
 
-  OOB (pos = this.head) {
+  isOOB (pos = this.head) {
     const max = this.#PARENT.game.gridSize
     const Y = pos[0]
     const X = pos[1]
-    return (Y < 0 || Y >= max) || (X < 0 || X >= max)
+    return (Y < 0 || Y > max) || (X < 0 || X > max)
   }
 
-  collidingWithSnakes (pos) {
-    return this.#PARENT.game.connectedPlayers.some(p => this.collidingWithSnake(p.snake, pos))
+  isCollidingWithSnakes (pos) {
+    return this.#PARENT.game.connectedPlayers.some(p => this.isCollidingWithSnake(p.snake, pos))
   }
-  collidingWithSnake (snake, pos) {
-    const {head, body} = snake
+  isCollidingWithSnake (snake, pos) {
     const isSame = snake === this
-    
+
+    const movePointer = (segment) => {
+      switch (segment.direction) {
+        case 0:
+          pointer[0] += segment._length
+          break
+        case 1:
+          pointer[1] -= segment._length
+          break
+        case 2:
+          pointer[0] -= segment._length
+          break
+        case 3:
+          pointer[1] += segment._length
+          break
+      }
+    }
+
+    const pointer = [...snake.head]
+    const body = snake.body
+
+    return body.some((segment, i) => {
+      if (i === 0 && isSame) return movePointer(segment)
+      const isY = pointer[0] === pos[0]
+      const isX = pointer[1] === pos[1]
+
+      if (isY && isX) return true
+
+      if (isY) {
+        if (segment.direction === 1) { if (pos[1] < pointer[1] && pos[1] > (pointer[1] - segment._length)) return true }
+        else if (segment.direction === 3) { if (pos[1] > pointer[1] && pos[1] < (pointer[1] + segment._length)) return true }
+      } else if (isX) {
+        if (segment.direction === 0) { if (pos[0] > pointer[0] && pos[0] < (pointer[0] + segment._length)) return true }
+        else if (segment.direction === 2) { if (pos[0] < pointer[0] && pos[0] > (pointer[0] - segment._length)) return true }
+      }
+
+      movePointer(segment)
+    })
   }
 
   grow () {
     this.lastSegment._length++
-    // const newCell = this.body.length > 0 ? [...(_.last(this.body))] : this.head
-    // let index = 0
-    // let op = -1
-    // switch (this.prevDirection) {
-    //   case 1:
-    //   case 3:
-    //     index = 1
-    //   case 2:
-    //   case 3:
-    //     op = 1
-    // }
-    // newCell[index] += op
-    // this.body.push(newCell)
   }
 
   die () {
