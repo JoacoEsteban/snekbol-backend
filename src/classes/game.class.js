@@ -90,24 +90,86 @@ class GameInstance {
     })
   }
 
+  randomPosition () {
+    return [
+      Math.floor(Math.random() * 1000) % this.game.gridSize,
+      Math.floor(Math.random() * 1000) % this.game.gridSize
+    ]
+  }
+
+  randomValidPosition () {
+    let pos
+    do {
+      pos = this.randomPosition()
+    } while (this.isColliding(pos))
+    return pos
+  }
+
   createFruit () {
-    this.game.fruit[0] = Math.floor(Math.random() * 1000) % this.game.gridSize
-    this.game.fruit[1] = Math.floor(Math.random() * 1000) % this.game.gridSize
+    this.game.fruit = this.randomValidPosition()
   }
 
   removeFruit () {
     this.game.fruit = []
   }
 
-  isColliding (snake) {
-    // TODO make a pool with every cell that causes a collision and then compare to everyone
-    // if (coords[0] - gridSize > 0 || coords[0] < 0 || coords[1] - gridSize > 0 || coords[1] < 0) return true
-    // for (let i in snakeBody) {
-    //     let part = snakeBody[i]
-    //     if (coords[0] === part[0] && coords[1] === part[1]) return true
-    // }
-    return false
+  // ---------------------
+  isColliding (pos) {
+    return this.isOOB(pos) || this.isCollidingWithSnakes(pos)
   }
+
+  isOOB (pos = this.head) {
+    const max = this.game.gridSize
+    const Y = pos[0]
+    const X = pos[1]
+    return (Y < 0 || Y > max) || (X < 0 || X > max)
+  }
+
+  isCollidingWithSnakes (pos) {
+    return this.game.connectedPlayers.some(p => this.isCollidingWithSnake(p.snake, pos))
+  }
+  isCollidingWithSnake (snake, pos) {
+    const isSame = snake === this
+
+    const movePointer = (segment) => {
+      switch (segment.direction) {
+        case 0:
+          pointer[0] += segment._length
+          break
+        case 1:
+          pointer[1] -= segment._length
+          break
+        case 2:
+          pointer[0] -= segment._length
+          break
+        case 3:
+          pointer[1] += segment._length
+          break
+      }
+    }
+
+    const pointer = [...snake.head]
+    const body = snake.body
+
+    return body.some((segment, i) => {
+      if (i === 0 && isSame) return movePointer(segment)
+      const isY = pointer[0] === pos[0]
+      const isX = pointer[1] === pos[1]
+
+      if (isY && isX) return true
+
+      if (isY) {
+        if (segment.direction === 1) { if (pos[1] < pointer[1] && pos[1] > (pointer[1] - segment._length)) return true }
+        else if (segment.direction === 3) { if (pos[1] > pointer[1] && pos[1] < (pointer[1] + segment._length)) return true }
+      } else if (isX) {
+        if (segment.direction === 0) { if (pos[0] > pointer[0] && pos[0] < (pointer[0] + segment._length)) return true }
+        else if (segment.direction === 2) { if (pos[0] < pointer[0] && pos[0] > (pointer[0] - segment._length)) return true }
+      }
+
+      movePointer(segment)
+    })
+  }
+  // ---------------------
   checkFruit (snake) {
     if (!(snake.head[0] === this.game.fruit[0] && snake.head[1] === this.game.fruit[1])) return
     this.eatFruit(snake)
@@ -116,7 +178,7 @@ class GameInstance {
 
   eatFruit (snake) {
     snake.counter++
-    this.removeFruit()
+    // this.removeFruit()
     this.createFruit()
   }
 

@@ -14,6 +14,14 @@ module.exports = class Snake {
 
   #PARENT = null
 
+  get game () {
+    return this.#PARENT.game
+  }
+
+  get gameInstance () {
+    return this.game.gameInstance
+  }
+
   get firstSegment () {
     return this.body[0]
   }
@@ -48,7 +56,7 @@ module.exports = class Snake {
     }
     newPos[index] += op
 
-    if (this.isColliding(newPos)) return this.die()
+    if (this.gameInstance.isColliding(newPos)) return this.die()
 
     if (this.firstSegment && this.firstSegment.direction !== nextDirection) {
       this.body = [{
@@ -65,61 +73,6 @@ module.exports = class Snake {
     this.prevDirection = nextDirection
   }
 
-  isColliding (pos = this.head) {
-    return this.isOOB(pos) || this.isCollidingWithSnakes(pos)
-  }
-
-  isOOB (pos = this.head) {
-    const max = this.#PARENT.game.gridSize
-    const Y = pos[0]
-    const X = pos[1]
-    return (Y < 0 || Y > max) || (X < 0 || X > max)
-  }
-
-  isCollidingWithSnakes (pos) {
-    return this.#PARENT.game.connectedPlayers.some(p => this.isCollidingWithSnake(p.snake, pos))
-  }
-  isCollidingWithSnake (snake, pos) {
-    const isSame = snake === this
-
-    const movePointer = (segment) => {
-      switch (segment.direction) {
-        case 0:
-          pointer[0] += segment._length
-          break
-        case 1:
-          pointer[1] -= segment._length
-          break
-        case 2:
-          pointer[0] -= segment._length
-          break
-        case 3:
-          pointer[1] += segment._length
-          break
-      }
-    }
-
-    const pointer = [...snake.head]
-    const body = snake.body
-
-    return body.some((segment, i) => {
-      if (i === 0 && isSame) return movePointer(segment)
-      const isY = pointer[0] === pos[0]
-      const isX = pointer[1] === pos[1]
-
-      if (isY && isX) return true
-
-      if (isY) {
-        if (segment.direction === 1) { if (pos[1] < pointer[1] && pos[1] > (pointer[1] - segment._length)) return true }
-        else if (segment.direction === 3) { if (pos[1] > pointer[1] && pos[1] < (pointer[1] + segment._length)) return true }
-      } else if (isX) {
-        if (segment.direction === 0) { if (pos[0] > pointer[0] && pos[0] < (pointer[0] + segment._length)) return true }
-        else if (segment.direction === 2) { if (pos[0] < pointer[0] && pos[0] > (pointer[0] - segment._length)) return true }
-      }
-
-      movePointer(segment)
-    })
-  }
 
   grow () {
     this.lastSegment._length++
@@ -127,7 +80,7 @@ module.exports = class Snake {
 
   die () {
     this.flags.dead = true
-    this.#PARENT.game.onSnakeDead(this.#PARENT)
+    this.game.onSnakeDead(this.#PARENT)
   }
 }
 
