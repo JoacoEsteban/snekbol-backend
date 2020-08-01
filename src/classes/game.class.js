@@ -8,7 +8,8 @@ module.exports = class Game {
     }
     this.players = players || []
     this.fruit = fruit || []
-    this.gridSize = gridSize || 25,
+    this.gridSize = gridSize || 25
+    this.gridEdge = this.gridSize - 1
     this.gameInterval = null
     this.cycleTime = cycleTime
     this.gameInstance = new GameInstance(this)
@@ -119,7 +120,7 @@ class GameInstance {
   }
 
   isOOB (pos = this.head) {
-    const max = this.game.gridSize
+    const max = this.game.gridEdge
     const Y = pos[0]
     const X = pos[1]
     return (Y < 0 || Y > max) || (X < 0 || X > max)
