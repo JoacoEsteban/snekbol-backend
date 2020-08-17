@@ -1,21 +1,35 @@
-module.exports = class Snake {
-  constructor(parent, id = global.uuid(),) {
-    this.#PARENT = parent
-    this.head = [null, null]
+type snakeBodySegment = {
+  _length: number,
+  direction: AllowedDirections
+}
+
+class Snake {
+  private parent: Player
+  head: coord
+  id: string
+  body: snakeBodySegment[]
+  nextDirection: AllowedDirections
+  prevDirection: AllowedDirections
+  counter: number
+  flags: {
+    dead: boolean
+  }
+
+  constructor(parent: Player, id: string = global.uuid()) {
+    this.parent = parent
+    this.head = [0, 0]
     this.id = id
     this.body = []
-    this.nextDirection = 1
-    this.prevDirection = 1
+    this.nextDirection = AllowedDirections.right
+    this.prevDirection = AllowedDirections.right
     this.counter = 0
     this.flags = {
       dead: false
     }
   }
 
-  #PARENT = null
-
   get game () {
-    return this.#PARENT.game
+    return this.parent.game
   }
 
   get gameInstance () {
@@ -30,7 +44,7 @@ module.exports = class Snake {
     return this.body[this.body.length - 1]
   }
 
-  resetPosition (x = 0, y = 0, length = 10, direction = this.prevDirection) {
+  resetPosition (x: number = 0, y: number = 0, length: number = 10, direction: AllowedDirections = this.prevDirection): void {
     this.head = [y, x]
     this.body = [{
       _length: length,
@@ -38,20 +52,21 @@ module.exports = class Snake {
     }]
   }
 
-  move () {
-    const nextDirection = (Math.abs(this.nextDirection - this.prevDirection) === 2) ? this.prevDirection : this.nextDirection
-    const newPos = [...this.head]
+  move (): void {
+    const nextDirection: AllowedDirections = (Math.abs(this.nextDirection - this.prevDirection) === 2) ? this.prevDirection : this.nextDirection
+    // const newPos = [...this.head]
+    const newPos = _.clone(this.head)
     let index = 0
     let op = -1
     switch (nextDirection) {
-      case 1:
+      case AllowedDirections.right:
         index = 1
         op = 1
         break
-      case 3:
+      case AllowedDirections.left:
         index = 1
         break
-      case 2:
+      case AllowedDirections.down:
         op = 1
     }
     newPos[index] += op
@@ -74,13 +89,13 @@ module.exports = class Snake {
   }
 
 
-  grow () {
+  grow (): void {
     this.lastSegment._length++
   }
 
-  die () {
+  die (): void {
     this.flags.dead = true
-    this.game.onSnakeDead(this.#PARENT)
+    this.game.onSnakeDead(this.parent)
   }
 }
 

@@ -1,13 +1,14 @@
-const store = require('../../store')
-const lobbyController = require('./lobby.controller')
+import store from '@/store'
+import lobbyController from './lobby.controller'
+import { Request, Response } from 'express'
 
-module.exports = {
-  handleLogin (req, res) {
+export default {
+  handleLogin (req: Request, res: Response) {
     const player = store.CONTROLLER.newPlayer(req.body.name)
     lobbyController.allocatePlayerInGame(player)
     const playerInfo = player.sendableInfo
     playerInfo.secret = player.secret
     res.json({ player: playerInfo })
-    player.game.onPlayerConnected()
+    player.game?.onPlayerConnected()
   }
 }
