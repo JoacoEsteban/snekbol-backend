@@ -1,15 +1,13 @@
 import express, { Application, Request, Response } from 'express'
 
 import lodash from 'lodash'
-import uuid from 'uuid'
 
 global._ = lodash
-global.uuid = uuid.v4
 
-const app: Application = express();
-require('express-ws')(app);
+const app: Application = express()
+require('express-ws')(app)
 
-const morgan = require('morgan');
+const morgan = require('morgan')
 const bodyParser = require('body-parser')
 
 app.use(bodyParser.json()) // support json encoded bodies

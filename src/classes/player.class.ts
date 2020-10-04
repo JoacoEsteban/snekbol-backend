@@ -1,29 +1,34 @@
-type PlayerFlags = {
-  connected: boolean;
-  prepared: boolean;
+import { v4 } from "uuid"
+import { AllowedDirections } from "../typings"
+import { Game } from "./game.class"
+import { Snake } from "./snake.class"
+
+export type PlayerFlags = {
+  connected: boolean
+  prepared: boolean
 }
 
-interface PlayerSendableInfo {
-  id: string;
-  secret?: string;
-  name: string;
-  game_id: Nullable<string>;
-  flags: PlayerFlags;
-  snake: Snake;
+export interface PlayerSendableInfo {
+  id: string
+  secret?: string
+  name: string
+  game_id: string | null
+  flags: PlayerFlags
+  snake: Snake
 }
 
-declare class Player {
+export class Player {
   id: string
   secret: string
   name: string
-  game: Nullable<Game>
-  ws: Nullable<WebSocket>
+  game: Game | null
+  ws: WebSocket | null
   flags: PlayerFlags
   snake: Snake
 
   constructor(name: string, game?: Game, connected?: boolean, prepared?: boolean) {
-    this.id = global.uuid()
-    this.secret = global.uuid()
+    this.id = v4()
+    this.secret = v4()
     this.name = name
     this.game = game || null
     this.ws = null
@@ -34,7 +39,7 @@ declare class Player {
     this.snake = new Snake(this)
   }
 
-  get sendableInfo (): PlayerSendableInfo {
+  get sendableInfo(): PlayerSendableInfo {
     return {
       id: this.id,
       name: this.name,
@@ -44,14 +49,14 @@ declare class Player {
     }
   }
 
-  setWs (ws: WebSocket) {
+  setWs(ws: WebSocket) {
     this.flags.connected = true
     this.ws = ws
     ws.onclose = () => this.onDisconnect()
   }
 
-  imReady () {
-    if (!this.game) throw new Error ('PLAYER NOT IN GAME')
+  imReady() {
+    if (!this.game) throw new Error('PLAYER NOT IN GAME')
 
     this.flags.prepared = true
     this.flags.connected = true
@@ -60,8 +65,8 @@ declare class Player {
     //  return ws.send('not all ready')
   }
 
-  onDisconnect () {
-    if (!this.game) throw new Error ('PLAYER NOT IN GAME')
+  onDisconnect() {
+    if (!this.game) throw new Error('PLAYER NOT IN GAME')
 
     console.log(`Player ${this.name} disconnected`)
     this.flags.connected = false
@@ -69,7 +74,7 @@ declare class Player {
   }
 
   // ---------------------GAME---------------------
-  setDirection (direction: AllowedDirections) {
+  setDirection(direction: AllowedDirections) {
     this.snake.nextDirection = direction
   }
 }

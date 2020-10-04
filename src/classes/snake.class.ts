@@ -1,9 +1,14 @@
-type snakeBodySegment = {
+import _ from "lodash"
+import { v4 } from "uuid"
+import { AllowedDirections, coord } from "../typings"
+import { Player } from "./player.class"
+
+export type snakeBodySegment = {
   _length: number,
   direction: AllowedDirections
 }
 
-class Snake {
+export class Snake {
   private parent: Player
   head: coord
   id: string
@@ -15,7 +20,7 @@ class Snake {
     dead: boolean
   }
 
-  constructor(parent: Player, id: string = global.uuid()) {
+  constructor(parent: Player, id: string = v4()) {
     this.parent = parent
     this.head = [0, 0]
     this.id = id
@@ -28,23 +33,23 @@ class Snake {
     }
   }
 
-  get game () {
+  get game() {
     return this.parent.game
   }
 
-  get gameInstance () {
-    return this.game.gameInstance
+  get gameInstance() {
+    return this.game?.gameInstance
   }
 
-  get firstSegment () {
+  get firstSegment() {
     return this.body[0]
   }
 
-  get lastSegment () {
+  get lastSegment() {
     return this.body[this.body.length - 1]
   }
 
-  resetPosition (x: number = 0, y: number = 0, length: number = 10, direction: AllowedDirections = this.prevDirection): void {
+  resetPosition(x: number = 0, y: number = 0, length: number = 10, direction: AllowedDirections = this.prevDirection): void {
     this.head = [y, x]
     this.body = [{
       _length: length,
@@ -52,7 +57,7 @@ class Snake {
     }]
   }
 
-  move (): void {
+  move(): void {
     const nextDirection: AllowedDirections = (Math.abs(this.nextDirection - this.prevDirection) === 2) ? this.prevDirection : this.nextDirection
     // const newPos = [...this.head]
     const newPos = _.clone(this.head)
@@ -71,7 +76,7 @@ class Snake {
     }
     newPos[index] += op
 
-    if (this.gameInstance.isColliding(newPos)) return this.die()
+    if (this.gameInstance?.isColliding(newPos)) return this.die()
 
     if (this.firstSegment && this.firstSegment.direction !== nextDirection) {
       this.body = [{
@@ -89,13 +94,13 @@ class Snake {
   }
 
 
-  grow (): void {
+  grow(): void {
     this.lastSegment._length++
   }
 
-  die (): void {
+  die(): void {
     this.flags.dead = true
-    this.game.onSnakeDead(this.parent)
+    this.game?.onSnakeDead(this.parent)
   }
 }
 
@@ -103,9 +108,9 @@ class Snake {
 NEW BODY STRUCTURE
   Snake is now a set of arrays with a direction and length instead of just a set of points
   only x,y is the head
-  eg: 
+  eg:
                                  L-D
------------------------ 
+-----------------------
 --------------x....----
 --------------.--------
 --------------.--------

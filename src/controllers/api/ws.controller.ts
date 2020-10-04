@@ -1,3 +1,5 @@
+import { Player } from 'src/classes/player.class'
+import { WsMessage, AllowedDirectives } from '../../../src/typings'
 import store from '../../store'
 
 const auth = (player: Player, msg: any): boolean => {

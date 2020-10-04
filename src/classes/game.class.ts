@@ -1,4 +1,9 @@
-declare class Game {
+import { v4 } from "uuid"
+import { coord, Nullable } from "../typings"
+import { Player } from "./player.class"
+import { Snake, snakeBodySegment } from "./snake.class"
+
+export class Game {
   id: string
   flags: {
     started: boolean,
@@ -13,7 +18,7 @@ declare class Game {
   gameInstance: GameInstance
 
   constructor(cycleTime?: number, players?: Player[], fruit?: coord, gridSize?: number) {
-    this.id = global.uuid()
+    this.id = v4()
     this.flags = {
       started: false,
       ended: false,
@@ -23,11 +28,11 @@ declare class Game {
     this.gridSize = gridSize || 25
     this.gridEdge = this.gridSize - 1
     this.gameInterval = null
-    this.cycleTime = cycleTime ||  150
+    this.cycleTime = cycleTime || 150
     this.gameInstance = new GameInstance(this)
   }
 
-  get sendableInfo () {
+  get sendableInfo() {
     return {
       id: this.id,
       flags: this.flags,
@@ -37,7 +42,7 @@ declare class Game {
     }
   }
 
-  get isAvailableToJoin () {
+  get isAvailableToJoin() {
     return !this.flags.started && !this.flags.ended
   }
 
@@ -50,37 +55,37 @@ declare class Game {
   removePlayer(player: Player) {
     this.players = this.players.filter(p => p !== player)
   }
-  get connectedPlayers () {
+  get connectedPlayers() {
     return this.players.filter(player => player.flags.connected)
   }
   // ---------------------GAME---------------------
-  startGame () {
+  startGame() {
     this.flags.started = true
     this.gameInstance.startGame()
   }
-  sendToPlayer (player: Player, data?: object) {
+  sendToPlayer(player: Player, data?: object) {
     if (!player.flags.connected) return
 
     let toSend: string = JSON.stringify(data || { game: this.sendableInfo })
     player.ws?.send(toSend)
   }
-  sendToAllPlayers (data = {}) {
+  sendToAllPlayers(data = {}) {
     data = JSON.stringify(global._.merge({ game: this.sendableInfo }, data))
     this.players.forEach(player => this.sendToPlayer(player, data))
   }
   // ---------------------EVENTS---------------------
-  onPlayerReady () {
+  onPlayerReady() {
     const allReady = this.players.every(player => player.flags.prepared)
     allReady && this.startGame()
     return allReady
   }
-  onPlayerConnected () {
+  onPlayerConnected() {
     this.sendToAllPlayers()
   }
-  onPlayerDisconnected () {
+  onPlayerDisconnected() {
     this.gameInstance && this.gameInstance.areAllPlayersGone()
   }
-  onSnakeDead (player: Player) {
+  onSnakeDead(player: Player) {
     this.players = this.players.sort((a, b): number => {
       if (a === player) return 1
       if (b === player) return -1
@@ -92,15 +97,15 @@ declare class Game {
 
 class GameInstance {
   parent: Game
-  constructor (parent: Game) {
+  constructor(parent: Game) {
     this.parent = parent
   }
 
-  get game () {
+  get game() {
     return this.parent
   }
 
-  positionSnakes () {
+  positionSnakes() {
     this.game.players.forEach((player, index) => {
       // TODO position snakes
       player.snake = new Snake(player)
@@ -108,14 +113,14 @@ class GameInstance {
     })
   }
 
-  randomPosition (): coord {
+  randomPosition(): coord {
     return [
       Math.floor(Math.random() * 1000) % this.game.gridSize,
       Math.floor(Math.random() * 1000) % this.game.gridSize
     ]
   }
 
-  randomValidPosition () {
+  randomValidPosition() {
     let pos
     do {
       pos = this.randomPosition()
@@ -123,30 +128,30 @@ class GameInstance {
     return pos
   }
 
-  createFruit () {
+  createFruit() {
     this.game.fruit = this.randomValidPosition()
   }
 
-  removeFruit () {
+  removeFruit() {
     this.game.fruit = []
   }
 
   // ---------------------
-  isColliding (pos: coord): boolean {
+  isColliding(pos: coord): boolean {
     return this.isOOB(pos) || this.isCollidingWithSnakes(pos)
   }
 
-  isOOB (pos: coord): boolean {
+  isOOB(pos: coord): boolean {
     const max = this.game.gridEdge
     const Y = pos[0]
     const X = pos[1]
     return (Y < 0 || Y > max) || (X < 0 || X > max)
   }
 
-  isCollidingWithSnakes (pos: coord) {
+  isCollidingWithSnakes(pos: coord) {
     return this.game.connectedPlayers.some(p => this.isCollidingWithSnake(p.snake, pos))
   }
-  isCollidingWithSnake (snake: Snake, pos: coord) {
+  isCollidingWithSnake(snake: Snake, pos: coord) {
     const movePointer = (segment: snakeBodySegment) => {
       switch (segment.direction) {
         case 0:
@@ -185,38 +190,38 @@ class GameInstance {
     })
   }
   // ---------------------
-  checkFruit (snake: Snake) {
+  checkFruit(snake: Snake) {
     if (!(snake.head[0] === this.game.fruit[0] && snake.head[1] === this.game.fruit[1])) return
     this.eatFruit(snake)
     snake.grow()
   }
 
-  eatFruit (snake: Snake) {
+  eatFruit(snake: Snake) {
     snake.counter++
     // this.removeFruit()
     this.createFruit()
   }
 
-  areAllPlayersGone () {
+  areAllPlayersGone() {
     if (this.game.players.some(player => player.flags.connected)) return
     console.log('All players disconnected')
     this.closeGame()
   }
 
-  async closeGame () {
+  async closeGame() {
     try {
       this.game.gameInterval && clearInterval(this.game.gameInterval)
       this.game.flags.ended = true
-      await this.game.sendToAllPlayers({event: 'game-over'})
+      await this.game.sendToAllPlayers({ event: 'game-over' })
       console.log('Game Closed')
     } catch (error) {
       console.error('ERROR WHEN CLOSING GAME WITH ID ', this.game.id, error)
     }
   }
 
-  gameCycle () {
+  gameCycle() {
     let alive = 0
-    this.game.players.forEach(({snake}) => {
+    this.game.players.forEach(({ snake }) => {
       if (snake.flags.dead) return
       snake.move()
       if (snake.flags.dead) return
@@ -228,7 +233,7 @@ class GameInstance {
   }
 
 
-  startGame () {
+  startGame() {
     this.positionSnakes()
     this.createFruit()
     this.game.gameInterval = setInterval(() => this.gameCycle(), this.game.cycleTime)

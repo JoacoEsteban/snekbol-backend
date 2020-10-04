@@ -1,23 +1,23 @@
-declare type Nullable<T> = T | null;
+export type Nullable<T> = T | null
 
-declare type coord = [
+export type coord = [
   number, number
 ]
 
-declare enum AllowedDirections {
+export enum AllowedDirections {
   up = 0,
   right = 1,
   down = 2,
   left = 3,
 }
 
-declare enum AllowedDirectives {
+export enum AllowedDirectives {
   CONNECT,
   IM_READY,
   DIRECTION,
 }
 
-declare interface WsMessage {
+export interface WsMessage {
   player_id: string,
   player_secret: string,
   directive: AllowedDirectives,

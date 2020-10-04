@@ -1,9 +1,9 @@
-import store from '@/store'
+import store from '../../store'
 import lobbyController from './lobby.controller'
 import { Request, Response } from 'express'
 
 export default {
-  handleLogin (req: Request, res: Response) {
+  handleLogin(req: Request, res: Response) {
     const player = store.CONTROLLER.newPlayer(req.body.name)
     lobbyController.allocatePlayerInGame(player)
     const playerInfo = player.sendableInfo
