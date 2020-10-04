@@ -22,7 +22,7 @@ export default {
         player.imReady()
         break
       case AllowedDirectives.DIRECTION:
-        msg.direction && player.setDirection(msg.direction)
+        (msg.direction || msg.direction === 0) && player.setDirection(msg.direction)
         break
     }
   }

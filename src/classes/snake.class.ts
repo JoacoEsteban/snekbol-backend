@@ -9,7 +9,7 @@ export type snakeBodySegment = {
 }
 
 export class Snake {
-  private parent: Player
+  #parent: Player
   head: coord
   id: string
   body: snakeBodySegment[]
@@ -21,7 +21,7 @@ export class Snake {
   }
 
   constructor(parent: Player, id: string = v4()) {
-    this.parent = parent
+    this.#parent = parent
     this.head = [0, 0]
     this.id = id
     this.body = []
@@ -34,7 +34,7 @@ export class Snake {
   }
 
   get game() {
-    return this.parent.game
+    return this.#parent.game
   }
 
   get gameInstance() {
@@ -100,7 +100,7 @@ export class Snake {
 
   die(): void {
     this.flags.dead = true
-    this.game?.onSnakeDead(this.parent)
+    this.game?.onSnakeDead(this.#parent)
   }
 }
 

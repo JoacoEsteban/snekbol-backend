@@ -12,9 +12,9 @@ export enum AllowedDirections {
 }
 
 export enum AllowedDirectives {
-  CONNECT,
-  IM_READY,
-  DIRECTION,
+  CONNECT = 'connect',
+  IM_READY = 'imready',
+  DIRECTION = 'direction',
 }
 
 export interface WsMessage {
